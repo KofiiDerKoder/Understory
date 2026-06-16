@@ -1,0 +1,1697 @@
+/* ============================================
+   UNDERSTORY v2 — Forest-Inspired DJ Controller Theme
+   A dark, moody palette inspired by the forest floor beneath
+   a canopy of green. Built like hardware: unified dark body
+   with teal accent pads and a warm sage sublayer.
+   Enhanced with album-art-adaptive colors, LED glows,
+   glassmorphism, noise texture, and micro-animations.
+   ============================================ */
+
+/* ============================================
+   UNDERSTORY — Base & Variables
+   ============================================ */
+
+:root {
+    color-scheme: dark;
+
+    /* Core accents */
+    --accent-sidebar: #3fd0c9;
+    --accent-deck: #e8a23d;
+    --accent-content: #9fe84a;
+    --accent-pads: #ef6aaf;
+
+    /* Derived accent variants via color-mix */
+    --accent-sidebar-subtle: color-mix(in srgb, var(--accent-sidebar) 12%, transparent);
+    --accent-sidebar-medium: color-mix(in srgb, var(--accent-sidebar) 25%, transparent);
+    --accent-deck-subtle: color-mix(in srgb, var(--accent-deck) 12%, transparent);
+    --accent-deck-medium: color-mix(in srgb, var(--accent-deck) 20%, transparent);
+    --accent-content-subtle: color-mix(in srgb, var(--accent-content) 12%, transparent);
+    --accent-content-medium: color-mix(in srgb, var(--accent-content) 25%, transparent);
+    --accent-pads-subtle: color-mix(in srgb, var(--accent-pads) 12%, transparent);
+    --accent-pads-medium: color-mix(in srgb, var(--accent-pads) 25%, transparent);
+
+    /* Adaptive defaults (overwritten by theme.js) */
+    --dyn-bg: #11140f;
+    --dyn-surface: #1c2118;
+    --dyn-card: #242b1f;
+    --dyn-border: #33402c;
+    --dyn-accent: #3fd0c9;
+    --dyn-glow: rgba(63, 208, 201, 0.25);
+    --dyn-glow-strong: rgba(63, 208, 201, 0.5);
+    --dyn-glow-subtle: rgba(63, 208, 201, 0.1);
+    --dyn-sidebar: #11140f;
+    --dyn-player: #1c2118;
+    --dyn-progress-start: #c4912e;
+    --dyn-progress-end: #3fd0c9;
+    --dyn-vibrant: #3fd0c9;
+    --dyn-dark: #1c2118;
+    --dyn-light: #9fe84a;
+    --dyn-prominent: #e8a23d;
+    --dyn-muted: #8b9582;
+    --dyn-vibrant-rgb: 63, 208, 201;
+    --dyn-dark-rgb: 28, 33, 24;
+
+    /* Surface & border tokens */
+    --border: #33402c;
+    --surface-warm: #1f1c14;
+
+    /* Spacing tokens */
+    --space-xs: 4px;
+    --space-sm: 8px;
+    --space-md: 12px;
+    --space-lg: 16px;
+    --space-xl: 24px;
+
+    /* Radius tokens */
+    --radius-sm: 2px;
+    --radius-md: 4px;
+    --radius-lg: 8px;
+    --radius-xl: 12px;
+    --radius-full: 9999px;
+
+    /* Shadow tokens */
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+    --shadow-md: 0 2px 4px rgba(0, 0, 0, 0.4);
+    --shadow-lg: 0 4px 12px rgba(0, 0, 0, 0.5);
+
+    /* Transition tokens */
+    --ease-standard: cubic-bezier(0.4, 0, 0.2, 1);
+    --ease-decelerate: cubic-bezier(0, 0, 0.2, 1);
+    --ease-overshoot: cubic-bezier(0.34, 1.56, 0.64, 1);
+    --transition-fast: 120ms var(--ease-standard);
+    --duration-fast: 120ms;
+    --duration-normal: 200ms;
+    --duration-slow: 350ms;
+
+    /* Typography tokens */
+    --font-sans: 'Inter', 'Manrope', system-ui, -apple-system, sans-serif;
+    --font-mono: 'SF Mono', 'Cascadia Code', 'Consolas', monospace;
+
+    /* Noise texture — inline SVG for organic depth */
+    --noise-texture: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+}
+
+body, .Root__top-container {
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    line-height: 1.5;
+}
+
+button {
+    font: inherit;
+    cursor: pointer;
+}
+
+img {
+    max-width: 100%;
+    display: block;
+}
+
+/* ============================================
+   UNDERSTORY — Noise Texture Overlay
+   ============================================ */
+
+.Root__main-view::before,
+.Root__nav-bar::before,
+.Root__right-sidebar::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: var(--noise-texture);
+    background-repeat: repeat;
+    background-size: 128px 128px;
+    opacity: 0.5;
+    pointer-events: none;
+    z-index: 0;
+    mix-blend-mode: overlay;
+}
+
+.Root__main-view,
+.Root__nav-bar,
+.Root__right-sidebar {
+    position: relative;
+}
+
+.Root__main-view > *,
+.Root__nav-bar > *,
+.Root__right-sidebar > * {
+    position: relative;
+    z-index: 1;
+}
+
+/* ============================================
+   UNDERSTORY — Selection Styles
+   ============================================ */
+
+::selection {
+    background-color: var(--accent-sidebar-medium);
+    color: var(--spice-text);
+}
+
+/* ============================================
+   UNDERSTORY — Adaptive Backgrounds
+   ============================================ */
+
+.Root__main-view {
+    background: linear-gradient(
+        180deg,
+        var(--dyn-bg) 0%,
+        var(--spice-main) 30%
+    );
+}
+
+.Root__top-container {
+    background-color: var(--dyn-bg);
+}
+
+.main-entityHeader-backgroundColor,
+.main-actionBarBackground-background,
+.main-topBar-background {
+    background-image: none !important;
+}
+
+/* Scrollbar */
+.os-theme-spotify > .os-scrollbar-vertical > .os-scrollbar-handle {
+    background-color: var(--dyn-border);
+    border-radius: 4px;
+}
+
+.os-theme-spotify > .os-scrollbar-vertical > .os-scrollbar-handle:hover {
+    background-color: var(--spice-subtext);
+}
+
+.x-progressBar-fillColor {
+    transition: transform 1s linear;
+}
+
+*:has(.x-progressBar-fillColor):active .x-progressBar-fillColor {
+    transition-duration: 0.001s;
+}
+
+/* ============================================
+   UNDERSTORY — Top Bar / Global Nav
+   ============================================ */
+
+.Root__globalNav {
+    background: linear-gradient(
+        180deg,
+        color-mix(in srgb, var(--dyn-bg) 95%, var(--dyn-vibrant)) 0%,
+        var(--dyn-bg) 100%
+    );
+    border-bottom: 1px solid var(--dyn-border);
+}
+
+.main-globalNav-searchContainer {
+    background-color: color-mix(in srgb, var(--spice-card) 60%, transparent);
+    border: 1px solid var(--dyn-border);
+    border-radius: var(--radius-full);
+    transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.main-globalNav-searchContainer:focus-within {
+    border-color: var(--dyn-accent);
+    box-shadow: 0 0 0 2px var(--dyn-glow-subtle);
+}
+
+.main-topBar-topbarContentRight .control-button {
+    color: var(--spice-subtext);
+    transition: color var(--transition-fast);
+}
+
+.main-topBar-topbarContentRight .control-button:hover {
+    color: var(--dyn-accent);
+}
+
+.main-topBar-historyButtons .control-button {
+    color: var(--spice-subtext);
+}
+
+.main-topBar-historyButtons .control-button:hover {
+    color: var(--spice-text);
+}
+
+/* ============================================
+   UNDERSTORY — Sidebar (Channel Strip)
+   ============================================ */
+
+.Root__nav-bar {
+    background: linear-gradient(
+        180deg,
+        color-mix(in srgb, var(--dyn-sidebar) 92%, var(--dyn-vibrant)) 0%,
+        var(--dyn-sidebar) 40%,
+        var(--spice-sidebar) 100%
+    );
+    border-right: 1px solid var(--dyn-border);
+}
+
+/* Library header */
+.main-yourLibraryX-headerContent,
+.main-yourLibraryX-header {
+    font-variant: small-caps;
+    letter-spacing: 0.08em;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--spice-subtext);
+    text-transform: uppercase;
+    padding: 12px 16px 8px;
+}
+
+/* Entry point items */
+.main-navBar-navBarLink {
+    border-radius: var(--radius-md);
+    transition: background-color var(--transition-fast), color var(--transition-fast);
+}
+
+.main-navBar-navBarLink:hover {
+    background-color: var(--spice-highlight);
+}
+
+.main-navBar-navBarLinkActive {
+    background-color: var(--spice-highlight);
+    color: var(--accent-sidebar);
+}
+
+/* Playlist items */
+.main-rootlist-rootlistItemLink,
+.main-yourLibraryX-listItem,
+.main-yourLibraryX-navLink {
+    position: relative;
+    display: flex;
+    align-items: center;
+    padding: 6px 12px 6px 16px;
+    border-radius: var(--radius-md);
+    transition: background-color var(--transition-fast),
+                border-left-color var(--transition-fast),
+                box-shadow var(--transition-fast);
+    border-left: 3px solid transparent;
+}
+
+/* Teal indicator strip */
+.main-rootlist-rootlistItemLink:hover,
+.main-yourLibraryX-listItem:hover,
+.main-yourLibraryX-navLink:hover {
+    border-left-color: var(--accent-sidebar-subtle);
+}
+
+.main-rootlist-rootlistItemLinkActive,
+.main-yourLibraryX-navLinkActive,
+.main-collectionLinkButton-selected {
+    border-left-color: var(--accent-sidebar);
+}
+
+/* Active playlist — LED glow on left edge */
+.main-rootlist-rootlistItemLinkActive,
+.main-yourLibraryX-navLinkActive {
+    background-color: var(--spice-highlight);
+    color: var(--spice-text);
+    box-shadow: inset 3px 0 8px -2px var(--dyn-glow-subtle);
+}
+
+/* Playlist item images */
+.main-yourLibraryX-listRowEntityImage,
+.main-yourLibraryX-rowCover,
+.x-entityImage-imageContainer {
+    border-radius: var(--radius-md);
+    overflow: visible;
+}
+
+.main-yourLibraryX-listRowEntityImage img,
+.main-yourLibraryX-rowCover img,
+.x-entityImage-imageContainer img {
+    border-radius: var(--radius-md);
+    object-fit: cover;
+    width: 100%;
+    height: 100%;
+}
+
+/* Playlist item text */
+.main-yourLibraryX-listRowTitleLink {
+    color: var(--spice-text);
+    font-weight: 500;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.main-yourLibraryX-listRowSubtitle {
+    color: var(--spice-subtext);
+    font-size: 0.75rem;
+}
+
+/* Nav item icons */
+.main-yourLibraryX-listRowIcon,
+.main-yourLibraryX-listRowIconWrapper {
+    color: var(--spice-subtext);
+    transition: color var(--transition-fast);
+}
+
+.main-navBar-navBarLinkActive .main-yourLibraryX-listRowIcon,
+.main-yourLibraryX-navLinkActive .main-yourLibraryX-listRowIcon {
+    color: var(--accent-sidebar);
+}
+
+/* Create playlist / collection buttons */
+.main-createPlaylistButton-button,
+.main-collectionLinkButton-collectionLinkButton {
+    border-radius: var(--radius-md);
+    transition: background-color var(--transition-fast), color var(--transition-fast);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.main-createPlaylistButton-button:hover,
+.main-collectionLinkButton-collectionLinkButton:hover {
+    background-color: var(--spice-highlight);
+    color: var(--accent-sidebar);
+}
+
+/* Collapsed sidebar */
+.Root__nav-bar .main-createPlaylistButton-button {
+    margin: 4px auto;
+    width: 32px;
+    height: 32px;
+    padding: 0;
+}
+
+/* Sidebar dividers */
+.main-rootlist-rootlistDivider {
+    border-color: var(--dyn-border);
+    margin: 4px 16px;
+}
+
+/* Sidebar collapse state */
+[class*="libraryIsCollapsed"] .main-rootlist-rootlistItemLink,
+[class*="libraryIsCollapsed"] .main-yourLibraryX-listItem,
+[class*="libraryIsCollapsed"] .main-yourLibraryX-navLink,
+.sidebar-collapsed .main-rootlist-rootlistItemLink,
+.sidebar-collapsed .main-yourLibraryX-listItem,
+.sidebar-collapsed .main-yourLibraryX-navLink {
+    border-left-color: transparent;
+    padding-left: 12px;
+    box-shadow: none;
+}
+
+/* Sidebar scrollbar */
+.Root__nav-bar .os-scrollbar {
+    width: 6px;
+}
+
+/* ============================================
+   UNDERSTORY — Now Playing Bar (DJ Deck)
+   ============================================ */
+
+/* Glass effect on player bar */
+.Root__now-playing-bar {
+    background: linear-gradient(
+        180deg,
+        color-mix(in srgb, var(--dyn-player) 80%, transparent) 0%,
+        color-mix(in srgb, var(--spice-player) 92%, transparent) 100%
+    ) !important;
+    backdrop-filter: blur(20px) saturate(150%);
+    -webkit-backdrop-filter: blur(20px) saturate(150%);
+    border-top: 1px solid color-mix(in srgb, var(--dyn-border) 60%, var(--dyn-vibrant));
+    box-shadow:
+        0 -1px 0 0 color-mix(in srgb, var(--dyn-vibrant) 8%, transparent),
+        0 -8px 24px -4px rgba(0, 0, 0, 0.4);
+}
+
+/* Adaptive glow beneath player bar */
+.Root__now-playing-bar::after {
+    content: '';
+    position: absolute;
+    top: -12px;
+    left: 20%;
+    right: 20%;
+    height: 24px;
+    background: var(--dyn-glow);
+    filter: blur(16px);
+    border-radius: 50%;
+    z-index: 0;
+    opacity: 0;
+    transition: opacity var(--duration-slow) ease;
+    pointer-events: none;
+}
+
+.is-playing .Root__now-playing-bar::after {
+    opacity: 0.7;
+}
+
+.main-nowPlayingBar-nowPlayingBar {
+    background-color: transparent;
+    padding: 0 16px;
+    position: relative;
+    z-index: 1;
+}
+
+/* ---- Waveform Progress Bar ---- */
+
+.x-progressBar-progressBarBg {
+    background: repeating-linear-gradient(
+        90deg,
+        transparent,
+        transparent 2px,
+        rgba(255, 255, 255, 0.04) 2px,
+        rgba(255, 255, 255, 0.04) 4px
+    );
+    border-radius: 2px;
+    height: 6px;
+    cursor: pointer;
+    transition: height var(--duration-fast) var(--ease-standard);
+    position: relative;
+}
+
+.x-progressBar-progressBarBg:hover {
+    height: 10px;
+}
+
+/* Progress bar fill — adaptive gradient */
+.x-progressBar-fillColor {
+    background: linear-gradient(
+        90deg,
+        var(--dyn-progress-start) 0%,
+        var(--dyn-progress-end) 100%
+    ) !important;
+    border-radius: 2px;
+    height: 100%;
+    position: relative;
+}
+
+/* Glow trail behind progress fill */
+.x-progressBar-fillColor::after {
+    content: '';
+    position: absolute;
+    top: -2px;
+    left: 0;
+    right: 0;
+    bottom: -2px;
+    background: inherit;
+    filter: blur(4px);
+    opacity: 0.4;
+    border-radius: 4px;
+    pointer-events: none;
+    z-index: -1;
+}
+
+/* Progress bar slider thumb — jog wheel */
+.progress-bar__slider {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background-color: var(--dyn-progress-end);
+    border: 2px solid var(--spice-player);
+    box-shadow: 0 0 6px var(--dyn-glow);
+    transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+.progress-bar__slider:hover {
+    transform: translateY(-50%) scale(1.3);
+    box-shadow: 0 0 10px var(--dyn-glow-strong);
+}
+
+/* Time displays */
+.playback-bar__progress-time-elapsed,
+.main-playbackBarRemainingTime-container {
+    font-variant-numeric: tabular-nums lining-nums;
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    color: var(--spice-subtext);
+    letter-spacing: 0.04em;
+}
+
+/* ---- Playback Controls — Jog Wheel Buttons ---- */
+
+.player-controls__buttons {
+    gap: 8px;
+}
+
+/* Play/Pause — primary jog wheel */
+.main-playPauseButton-button {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--accent-deck), var(--dyn-progress-end));
+    color: var(--spice-player);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: box-shadow var(--transition-fast), transform var(--transition-fast);
+    border: none;
+    position: relative;
+}
+
+.main-playPauseButton-button:hover {
+    box-shadow: 0 0 12px var(--dyn-glow-strong);
+    transform: scale(1.08);
+}
+
+.main-playPauseButton-button:active {
+    transform: scale(0.95);
+}
+
+.main-playPauseButton-button svg {
+    fill: var(--spice-player);
+    width: 18px;
+    height: 18px;
+}
+
+/* Breathing glow when playing */
+.main-playPauseButton-button::after {
+    content: '';
+    position: absolute;
+    inset: -6px;
+    border-radius: 50%;
+    background: radial-gradient(
+        circle,
+        var(--dyn-glow) 0%,
+        transparent 70%
+    );
+    z-index: -1;
+    opacity: 0;
+    transition: opacity 300ms ease;
+    will-change: opacity, transform;
+}
+
+.is-playing .main-playPauseButton-button::after {
+    opacity: 1;
+    animation: jogWheelPulse 2s ease-in-out infinite;
+}
+
+@keyframes jogWheelPulse {
+    0%, 100% { opacity: 0.4; transform: scale(1); }
+    50% { opacity: 0.8; transform: scale(1.2); }
+}
+
+/* Skip / Previous — secondary jog wheels */
+.main-skipForwardButton-button,
+.main-skipBackButton-button {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background-color: transparent;
+    border: 1.5px solid var(--accent-deck);
+    color: var(--accent-deck);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color var(--transition-fast),
+                box-shadow var(--transition-fast),
+                transform var(--transition-fast);
+}
+
+.main-skipForwardButton-button:hover,
+.main-skipBackButton-button:hover {
+    background-color: var(--accent-deck-subtle);
+    box-shadow: 0 0 8px var(--accent-deck-subtle);
+    transform: scale(1.05);
+}
+
+.main-skipForwardButton-button:active,
+.main-skipBackButton-button:active {
+    transform: scale(0.92);
+}
+
+.main-skipForwardButton-button svg,
+.main-skipBackButton-button svg {
+    fill: var(--accent-deck);
+    width: 16px;
+    height: 16px;
+}
+
+/* Shuffle / Repeat — toggle pads */
+.main-shuffleButton-button,
+.main-repeatButton-button {
+    width: 28px;
+    height: 28px;
+    border-radius: var(--radius-md);
+    background-color: transparent;
+    border: 1.5px solid var(--dyn-border);
+    color: var(--spice-subtext);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: border-color var(--transition-fast),
+                background-color var(--transition-fast),
+                color var(--transition-fast),
+                box-shadow var(--transition-fast);
+}
+
+.main-shuffleButton-button:hover,
+.main-repeatButton-button:hover {
+    border-color: var(--accent-deck);
+    color: var(--accent-deck);
+}
+
+.main-shuffleButton-button:active,
+.main-repeatButton-button:active {
+    transform: scale(0.92);
+}
+
+/* Active shuffle/repeat — illuminated pad */
+.main-shuffleButton-active,
+.main-repeatButton-active,
+.main-shuffleButton-button[aria-label="Disable shuffle"] {
+    background-color: var(--accent-deck-medium);
+    border-color: var(--accent-deck);
+    color: var(--accent-deck);
+    box-shadow: 0 0 6px var(--accent-deck-subtle);
+}
+
+.main-shuffleButton-active svg,
+.main-repeatButton-active svg {
+    fill: var(--accent-deck);
+}
+
+/* Track info */
+.main-trackInfo-name {
+    color: var(--spice-text);
+    font-weight: 600;
+    font-size: 0.9rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.main-trackInfo-artists {
+    color: var(--spice-subtext);
+    font-size: 0.8rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* Cover art */
+.main-coverSlotCollapsed-container,
+.cover-art-image,
+.cover-art-square {
+    border-radius: var(--radius-md);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+/* ---- Volume Slider VU Meter ---- */
+
+.main-nowPlayingBar-sliderContainer {
+    background-color: var(--dyn-border);
+}
+
+.main-nowPlayingBar-sliderContainer .x-progressBar-fillColor {
+    background-color: var(--vu-color, var(--accent-sidebar)) !important;
+    transition: background-color 150ms ease;
+}
+
+.main-nowPlayingBar-sliderContainer .progress-bar__slider {
+    background-color: var(--vu-color, var(--accent-sidebar));
+    border-color: var(--spice-player);
+    box-shadow: 0 0 4px var(--accent-sidebar-subtle);
+}
+
+/* Generic control buttons */
+.control-button {
+    color: var(--spice-text);
+    transition: color var(--transition-fast);
+}
+
+.control-button:hover {
+    color: var(--accent-deck);
+}
+
+.control-button:active {
+    transform: scale(0.92);
+}
+
+/* Like/heart button */
+.main-likeButton-button:hover {
+    color: var(--accent-pads);
+}
+
+.main-likeButton-button:active {
+    transform: scale(0.9);
+}
+
+.main-likeButton-button[aria-checked="true"] {
+    color: var(--accent-pads);
+    filter: drop-shadow(0 0 4px var(--accent-pads-subtle));
+}
+
+/* ============================================
+   UNDERSTORY — Buttons, Cards & Context Menus
+   ============================================ */
+
+/* ---- Pad-Style Buttons ---- */
+
+.main-actionButtons-button,
+.artist-followButton-button,
+.main-addButton-button {
+    border-radius: var(--radius-md);
+    border: 1.5px solid var(--accent-pads);
+    background-color: transparent;
+    color: var(--accent-pads);
+    padding: 8px 16px;
+    font-weight: 600;
+    font-size: 0.8rem;
+    letter-spacing: 0.02em;
+    transition: background-color var(--transition-fast),
+                border-color var(--transition-fast),
+                box-shadow var(--transition-fast),
+                color var(--transition-fast),
+                transform var(--transition-fast);
+}
+
+.main-actionButtons-button:hover,
+.artist-followButton-button:hover,
+.main-addButton-button:hover {
+    background-color: var(--accent-pads-subtle);
+    border-color: var(--accent-pads);
+    box-shadow: 0 0 8px var(--accent-pads-subtle);
+    color: var(--accent-pads);
+    transform: translateY(-1px);
+}
+
+.main-actionButtons-button:active,
+.artist-followButton-button:active,
+.main-addButton-button:active {
+    background-color: var(--accent-pads-medium);
+    transform: scale(0.97) translateY(0);
+}
+
+.artist-followButton-followed {
+    background-color: var(--accent-pads-medium);
+    border-color: var(--accent-pads);
+    color: var(--accent-pads);
+    box-shadow: 0 0 6px var(--accent-pads-subtle);
+}
+
+/* Primary play button (entity pages) */
+.main-playButton-primary,
+.main-playButton-PlayButton {
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--accent-content), var(--dyn-accent));
+    color: var(--spice-main);
+    border: none;
+    width: 56px;
+    height: 56px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: box-shadow var(--transition-fast), transform var(--transition-fast);
+}
+
+.main-playButton-primary:hover,
+.main-playButton-PlayButton:hover {
+    box-shadow: 0 0 16px var(--accent-content-medium);
+    transform: scale(1.08);
+}
+
+.main-playButton-primary:active,
+.main-playButton-PlayButton:active {
+    transform: scale(0.95);
+}
+
+.main-playButton-primary svg,
+.main-playButton-PlayButton svg {
+    fill: var(--spice-main);
+    width: 24px;
+    height: 24px;
+}
+
+/* ---- Album/Playlist Cards ---- */
+
+.main-card-card {
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--dyn-border);
+    background-color: var(--dyn-card);
+    overflow: hidden;
+    transition: border-color var(--duration-normal) var(--ease-standard),
+                background-color var(--duration-normal) var(--ease-standard),
+                transform var(--duration-normal) var(--ease-standard),
+                box-shadow var(--duration-normal) var(--ease-standard);
+}
+
+.main-card-card:hover {
+    border-color: var(--dyn-accent);
+    background-color: var(--spice-highlight-elevated);
+    transform: translateY(-3px);
+    box-shadow: 0 8px 24px -4px rgba(0, 0, 0, 0.4),
+                0 0 12px var(--dyn-glow-subtle);
+}
+
+/* Card image */
+.main-cardImage-imageWrapper,
+.main-card-imageContainer,
+.main-card-imageContainerOld {
+    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+    overflow: hidden;
+}
+
+/* Card play button overlay */
+.main-card-PlayButtonContainer {
+    border-radius: 50%;
+    background-color: var(--accent-content);
+    box-shadow: var(--shadow-md);
+    transition: transform var(--duration-normal) var(--ease-overshoot),
+                opacity var(--transition-fast),
+                box-shadow var(--transition-fast);
+}
+
+.main-card-card:hover .main-card-PlayButtonContainer {
+    transform: scale(1.1);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+}
+
+.main-card-PlayButtonContainer svg {
+    fill: var(--spice-main);
+}
+
+/* Shortcut cards */
+.view-homeShortcutsGrid-shortcut {
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--dyn-border);
+    background-color: var(--dyn-card);
+    transition: border-color var(--duration-normal) var(--ease-standard),
+                background-color var(--duration-normal) var(--ease-standard),
+                transform var(--duration-normal) var(--ease-standard),
+                box-shadow var(--duration-normal) var(--ease-standard);
+    overflow: hidden;
+}
+
+.view-homeShortcutsGrid-shortcut:hover {
+    border-color: var(--dyn-accent);
+    background-color: var(--spice-highlight-elevated);
+    transform: translateY(-2px) scale(1.01);
+    box-shadow: 0 6px 16px -2px rgba(0, 0, 0, 0.3),
+                0 0 8px var(--dyn-glow-subtle);
+}
+
+.view-homeShortcutsGrid-PlayButtonContainer {
+    width: 32px !important;
+    height: 32px !important;
+    border-radius: 50%;
+    background-color: var(--accent-content);
+    box-shadow: var(--shadow-md);
+    opacity: 0;
+    transition: opacity var(--transition-fast), transform var(--duration-normal) var(--ease-overshoot);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.view-homeShortcutsGrid-shortcut:hover .view-homeShortcutsGrid-PlayButtonContainer {
+    opacity: 1;
+}
+
+.view-homeShortcutsGrid-PlayButtonContainer svg {
+    fill: var(--spice-main);
+    width: 14px;
+    height: 14px;
+}
+
+/* Filter pills */
+.main-chipContainer-chip,
+.main-entityBlock-filtersContainer .main-chipContainer-chip {
+    border-radius: var(--radius-full);
+    border: 1px solid var(--dyn-border);
+    background-color: transparent;
+    color: var(--spice-text);
+    font-size: 0.8rem;
+    font-weight: 500;
+    padding: 6px 16px;
+    transition: background-color var(--transition-fast),
+                border-color var(--transition-fast),
+                box-shadow var(--transition-fast);
+}
+
+.main-chipContainer-chip:hover {
+    background-color: var(--spice-highlight);
+    border-color: var(--spice-subtext);
+}
+
+.main-chipContainer-chip:active {
+    transform: scale(0.96);
+}
+
+.main-chipContainer-chipActive,
+.main-chipContainer-chip[aria-checked="true"] {
+    background-color: var(--spice-text);
+    color: var(--spice-main);
+    border-color: var(--spice-text);
+    box-shadow: 0 0 8px rgba(var(--spice-rgb-text, 233, 237, 228), 0.2);
+}
+
+/* Card metadata */
+.main-card-cardTitle {
+    color: var(--spice-text);
+    font-weight: 600;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.main-card-cardSubHeader,
+.main-card-cardMetadata {
+    color: var(--spice-subtext);
+}
+
+/* ---- Shelves (Content Rows) ---- */
+
+.main-shelf-title {
+    font-size: 1.3rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    color: var(--spice-text);
+    position: relative;
+    display: inline-block;
+}
+
+/* Shelf title accent underline */
+.main-shelf-title::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    width: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--dyn-accent), transparent);
+    border-radius: 1px;
+    transition: width var(--duration-slow) var(--ease-decelerate);
+}
+
+.main-shelf-header:hover .main-shelf-title::after {
+    width: 60px;
+}
+
+.main-shelf-header {
+    padding-bottom: 8px;
+}
+
+/* ---- Context Menus — Glass Effect ---- */
+
+.main-contextMenu-menu,
+.main-contextMenu-tippy {
+    background: color-mix(in srgb, var(--spice-card) 80%, transparent) !important;
+    backdrop-filter: blur(20px) saturate(150%);
+    -webkit-backdrop-filter: blur(20px) saturate(150%);
+    border: 1px solid color-mix(in srgb, var(--dyn-border) 60%, var(--dyn-vibrant));
+    border-radius: var(--radius-lg);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5),
+                inset 0 1px 0 color-mix(in srgb, white 8%, transparent);
+    padding: var(--space-xs);
+}
+
+.main-contextMenu-menuItem,
+.main-contextMenu-menuItemButton {
+    border-radius: var(--radius-md);
+    color: var(--spice-text);
+    transition: background-color var(--transition-fast),
+                box-shadow var(--transition-fast);
+}
+
+.main-contextMenu-menuItemButton:hover {
+    background-color: var(--spice-highlight);
+    box-shadow: inset 2px 0 0 var(--accent-sidebar);
+}
+
+.main-contextMenu-menuItemButton:active {
+    background-color: var(--spice-highlight);
+}
+
+.main-contextMenu-menuItemButton:hover .main-contextMenu-menuItemIconWrapper {
+    color: var(--accent-sidebar);
+    filter: drop-shadow(0 0 3px var(--accent-sidebar-subtle));
+}
+
+.main-contextMenu-heading {
+    color: var(--spice-subtext);
+    font-variant: small-caps;
+    letter-spacing: 0.06em;
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.main-contextMenu-dividerAfter,
+.main-contextMenu-dividerBefore {
+    border-color: var(--dyn-border);
+}
+
+.main-contextMenu-menuItemButtonDisabled {
+    color: var(--spice-button-disabled);
+    opacity: 0.5;
+}
+
+/* ---- Track List ---- */
+
+.main-trackList-trackListRow {
+    border-radius: var(--radius-md);
+    transition: background-color var(--transition-fast);
+    user-select: none;
+}
+
+.main-trackList-trackListRow:hover {
+    background-color: var(--spice-highlight);
+}
+
+/* Active/playing track — adaptive accent */
+.main-trackList-active {
+    color: var(--dyn-accent);
+}
+
+.main-trackList-playingIcon {
+    color: var(--dyn-accent);
+    filter: drop-shadow(0 0 3px var(--dyn-glow-subtle));
+}
+
+/* Track list header */
+.main-trackList-trackListHeader {
+    color: var(--spice-subtext);
+    font-size: 0.75rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    font-weight: 600;
+    border-bottom: 1px solid var(--dyn-border);
+}
+
+.main-trackList-rowTitle {
+    color: var(--spice-text);
+    font-weight: 500;
+}
+
+.main-trackList-rowSubTitle {
+    color: var(--spice-subtext);
+    font-size: 0.8rem;
+}
+
+.main-trackList-rowDuration {
+    color: var(--spice-subtext);
+    font-variant-numeric: tabular-nums lining-nums;
+    font-family: var(--font-mono);
+}
+
+/* Scrollbar fade */
+.os-viewport[fade="full"] {
+    -webkit-mask-image: linear-gradient(transparent 0%, black 10%, black 90%, transparent 100%);
+}
+
+/* ============================================
+   UNDERSTORY — Right Sidebar (Queue / NPV)
+   ============================================ */
+
+.Root__right-sidebar {
+    background: linear-gradient(
+        180deg,
+        color-mix(in srgb, var(--dyn-sidebar) 90%, var(--dyn-vibrant)) 0%,
+        var(--spice-sidebar) 100%
+    );
+    border-left: 1px solid var(--dyn-border);
+}
+
+.main-nowPlayingView-container,
+.main-nowPlayingView-mainContainer {
+    background-color: transparent;
+}
+
+.main-nowPlayingView-headerText {
+    color: var(--spice-text);
+}
+
+.main-nowPlayingView-sectionHeaderText {
+    color: var(--spice-subtext);
+    font-variant: small-caps;
+    letter-spacing: 0.06em;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.main-nowPlayingView-trackInfo {
+    color: var(--spice-text);
+}
+
+.main-nowPlayingView-queueItem {
+    border-radius: var(--radius-md);
+    transition: background-color var(--transition-fast);
+}
+
+.main-nowPlayingView-queueItem:hover {
+    background-color: var(--spice-highlight);
+}
+
+.main-nowPlayingView-aboutArtist {
+    background-color: var(--dyn-card);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--dyn-border);
+}
+
+.main-nowPlayingView-aboutArtistBio {
+    color: var(--spice-subtext);
+}
+
+.main-nowPlayingView-aboutArtistButton,
+.artist-followButton-button {
+    border-radius: var(--radius-md);
+}
+
+.main-nowPlayingView-actionButton {
+    border-radius: var(--radius-md);
+    transition: background-color var(--transition-fast);
+}
+
+.main-nowPlayingView-actionButton:hover {
+    background-color: var(--spice-highlight);
+}
+
+/* ============================================
+   UNDERSTORY — Search Page
+   ============================================ */
+
+.search-searchCategory-SearchCategory {
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    transition: transform var(--duration-normal) var(--ease-standard),
+                box-shadow var(--duration-normal) var(--ease-standard);
+}
+
+.search-searchCategory-SearchCategory:hover {
+    transform: scale(1.02);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+}
+
+.x-searchInput-searchInputInput {
+    background-color: color-mix(in srgb, var(--spice-card) 60%, transparent);
+    border: 1px solid var(--dyn-border);
+    border-radius: var(--radius-full);
+    color: var(--spice-text);
+    transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.x-searchInput-searchInputInput:hover {
+    border-color: var(--spice-subtext);
+}
+
+.x-searchInput-searchInputInput:focus {
+    border-color: var(--dyn-accent);
+    box-shadow: 0 0 0 2px var(--dyn-glow-subtle);
+}
+
+.x-searchInput-searchInputInput::placeholder {
+    color: var(--spice-subtext);
+}
+
+/* ============================================
+   UNDERSTORY — Settings Page
+   ============================================ */
+
+.main-settings-container {
+    background-color: transparent;
+}
+
+.main-settings-container .main-settings-row {
+    border-radius: var(--radius-md);
+    transition: background-color var(--transition-fast);
+}
+
+.main-settings-container .main-settings-row:hover {
+    background-color: var(--spice-highlight);
+}
+
+.main-settings-container .main-settings-rowTitle {
+    color: var(--spice-text);
+    font-weight: 500;
+}
+
+.main-settings-container .main-settings-rowSubTitle {
+    color: var(--spice-subtext);
+    font-size: 0.8rem;
+}
+
+/* ============================================
+   UNDERSTORY — Queue Page
+   ============================================ */
+
+.main-queue-container {
+    background-color: transparent;
+}
+
+.main-queue-header {
+    color: var(--spice-text);
+}
+
+.main-queue-subtitle {
+    color: var(--spice-subtext);
+    font-size: 0.8rem;
+}
+
+/* ============================================
+   UNDERSTORY — Lyrics Page
+   ============================================ */
+
+.lyrics-lyrics-container {
+    color: var(--spice-text);
+}
+
+.lyrics-lyrics-background {
+    background: linear-gradient(
+        180deg,
+        var(--dyn-bg) 0%,
+        color-mix(in srgb, var(--dyn-dark) 60%, var(--spice-main)) 100%
+    );
+}
+
+/* ============================================
+   UNDERSTORY — Toast Notifications
+   ============================================ */
+
+.main-toast-container {
+    z-index: 9999;
+}
+
+/* ============================================
+   UNDERSTORY — Cinema Mode
+   ============================================ */
+
+html[data-cinema-npv-postenter] .Root__main-view {
+    grid-column: 1 / -1;
+}
+
+html[data-cinema-npv-postenter] .Root__right-sidebar {
+    background-color: var(--spice-main);
+    border-left: none;
+}
+
+html[data-cinema-npv-postenter] .Root__cinema-view {
+    background-color: var(--spice-main);
+}
+
+/* ============================================
+   UNDERSTORY — Legacy / YLX Layout Support
+   ============================================ */
+
+.legacy .main-yourLibraryX-headerContent,
+.ylx .main-yourLibraryX-headerContent {
+    font-variant: small-caps;
+    letter-spacing: 0.08em;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--spice-subtext);
+    text-transform: uppercase;
+}
+
+/* ============================================
+   UNDERSTORY — Spotify Connect State
+   ============================================ */
+
+.connected .main-coverSlotCollapsed-container {
+    opacity: 0.7;
+}
+
+.connected .main-nowPlayingBar-nowPlayingBar {
+    opacity: 0.85;
+}
+
+/* ============================================
+   UNDERSTORY — Accessibility
+   ============================================ */
+
+*:focus-visible {
+    outline: 2px solid var(--accent-sidebar);
+    outline-offset: 2px;
+    border-radius: var(--radius-sm);
+}
+
+.main-card-card:focus-visible {
+    outline: 2px solid var(--accent-content);
+    outline-offset: 2px;
+    box-shadow: 0 0 0 4px var(--accent-content-subtle);
+}
+
+.main-playPauseButton-button:focus-visible {
+    outline: 2px solid var(--accent-deck);
+    outline-offset: 3px;
+}
+
+.main-actionButtons-button:focus-visible,
+.artist-followButton-button:focus-visible {
+    outline: 2px solid var(--accent-pads);
+    outline-offset: 2px;
+    box-shadow: 0 0 0 4px var(--accent-pads-subtle);
+}
+
+.main-shuffleButton-button:focus-visible,
+.main-repeatButton-button:focus-visible,
+.main-skipForwardButton-button:focus-visible,
+.main-skipBackButton-button:focus-visible {
+    outline: 2px solid var(--accent-deck);
+    outline-offset: 2px;
+}
+
+.control-button:focus-visible {
+    outline: 2px solid var(--dyn-accent);
+    outline-offset: 2px;
+}
+
+.main-likeButton-button:focus-visible {
+    outline: 2px solid var(--accent-pads);
+    outline-offset: 2px;
+}
+
+.x-searchInput-searchInputInput:focus-visible {
+    outline: 2px solid var(--dyn-accent);
+    outline-offset: 2px;
+}
+
+.main-chipContainer-chip:focus-visible {
+    outline: 2px solid var(--dyn-accent);
+    outline-offset: 2px;
+}
+
+.main-contextMenu-menuItemButton:focus-visible {
+    outline: 2px solid var(--accent-sidebar);
+    outline-offset: 2px;
+}
+
+.main-confirmDialog-confirmButton:focus-visible,
+.main-confirmDialog-cancelButton:focus-visible {
+    outline: 2px solid var(--accent-content);
+    outline-offset: 2px;
+}
+
+.main-rootlist-rootlistItemLink:focus-visible,
+.main-yourLibraryX-navLink:focus-visible {
+    outline: 2px solid var(--accent-sidebar);
+    outline-offset: 2px;
+}
+
+.view-homeShortcutsGrid-shortcut:focus-visible {
+    outline: 2px solid var(--dyn-accent);
+    outline-offset: 2px;
+}
+
+.main-nowPlayingView-queueItem:focus-visible {
+    outline: 2px solid var(--dyn-accent);
+    outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+
+    .x-progressBar-fillColor { transition: none !important; }
+    .progress-bar__slider:hover { transform: translateY(-50%); }
+    .main-playPauseButton-button:active,
+    .main-actionButtons-button:active { transform: none; }
+    .main-card-card:hover,
+    .main-playButton-primary:hover,
+    .main-playButton-PlayButton:hover { transform: none; }
+    .Root__now-playing-bar::after { animation: none; }
+}
+
+@media (forced-colors: active) {
+    .main-rootlist-rootlistItemLink,
+    .main-yourLibraryX-navLink {
+        border-left: 3px solid LinkText;
+    }
+    .main-card-card { border: 1px solid LinkText; }
+    .main-playPauseButton-button { forced-color-adjust: none; }
+    .main-skipForwardButton-button,
+    .main-skipBackButton-button { forced-color-adjust: none; }
+    .main-shuffleButton-button,
+    .main-repeatButton-button { forced-color-adjust: none; }
+    .main-likeButton-button { forced-color-adjust: none; }
+    .main-actionButtons-button,
+    .artist-followButton-button { forced-color-adjust: none; }
+    .x-progressBar-fillColor { forced-color-adjust: none; }
+    .main-nowPlayingBar-sliderContainer .x-progressBar-fillColor { forced-color-adjust: none; }
+}
+
+.main-shuffleButton-button,
+.main-repeatButton-button {
+    min-width: 24px;
+    min-height: 24px;
+}
+
+/* ============================================
+   UNDERSTORY — Performance Optimizations
+   ============================================ */
+
+.Root__nav-bar { contain: layout style; }
+.Root__right-sidebar { contain: layout style; }
+.Root__now-playing-bar { contain: layout style paint; }
+.main-card-card { contain: layout style; }
+.main-trackList-trackListRow {
+    contain: layout style;
+    contain-intrinsic-size: auto 56px;
+    content-visibility: auto;
+}
+
+.Root__main-view,
+.Root__nav-bar,
+.Root__right-sidebar {
+    overscroll-behavior: contain;
+}
+
+html { scrollbar-gutter: stable; }
+
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb {
+    background-color: var(--dyn-border);
+    border-radius: var(--radius-md);
+    border: 2px solid transparent;
+    background-clip: content-box;
+}
+::-webkit-scrollbar-thumb:hover { background-color: var(--spice-subtext); }
+::-webkit-scrollbar-thumb:active { background-color: var(--accent-sidebar); }
+::-webkit-scrollbar-corner { background: transparent; }
+
+.Root__nav-bar ::-webkit-scrollbar { width: 6px; }
+.Root__right-sidebar ::-webkit-scrollbar { width: 6px; }
+
+* {
+    scrollbar-width: thin;
+    scrollbar-color: var(--dyn-border) transparent;
+}
+
+/* ============================================
+   UNDERSTORY — Design Polish & Animations
+   ============================================ */
+
+/* Staggered card entrance */
+@keyframes fadeSlideIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.main-shelf-title {
+    animation: fadeSlideIn var(--duration-normal) var(--ease-decelerate) both;
+}
+
+/* Sidebar item stagger */
+.main-rootlist-rootlistItemLink,
+.main-yourLibraryX-listItem,
+.main-yourLibraryX-navLink {
+    animation: fadeSlideIn var(--duration-slow) var(--ease-decelerate) both;
+}
+
+.main-rootlist-rootlistItemLink:nth-child(1),
+.main-yourLibraryX-navLink:nth-child(1) { animation-delay: 0ms; }
+.main-rootlist-rootlistItemLink:nth-child(2),
+.main-yourLibraryX-navLink:nth-child(2) { animation-delay: 30ms; }
+.main-rootlist-rootlistItemLink:nth-child(3),
+.main-yourLibraryX-navLink:nth-child(3) { animation-delay: 60ms; }
+.main-rootlist-rootlistItemLink:nth-child(4),
+.main-yourLibraryX-navLink:nth-child(4) { animation-delay: 90ms; }
+.main-rootlist-rootlistItemLink:nth-child(5),
+.main-yourLibraryX-navLink:nth-child(5) { animation-delay: 120ms; }
+.main-rootlist-rootlistItemLink:nth-child(6),
+.main-yourLibraryX-navLink:nth-child(6) { animation-delay: 150ms; }
+
+/* Equalizer bars for playing track */
+.main-trackList-playingIcon {
+    display: inline-flex;
+    gap: 2px;
+    align-items: flex-end;
+    height: 12px;
+}
+
+.main-trackList-playingIcon::before,
+.main-trackList-playingIcon::after,
+.main-trackList-playingIcon span {
+    display: block;
+    width: 2px;
+    background: var(--dyn-accent);
+    border-radius: 1px;
+}
+
+.main-trackList-playingIcon::before { animation: eqBar1 0.6s ease-in-out infinite; }
+.main-trackList-playingIcon span { animation: eqBar2 0.5s ease-in-out infinite 0.1s; }
+.main-trackList-playingIcon::after { animation: eqBar3 0.7s ease-in-out infinite 0.2s; }
+
+@keyframes eqBar1 { 0%, 100% { height: 30%; } 50% { height: 100%; } }
+@keyframes eqBar2 { 0%, 100% { height: 60%; } 50% { height: 40%; } }
+@keyframes eqBar3 { 0%, 100% { height: 45%; } 50% { height: 85%; } }
+
+/* FOUC prevention */
+html {
+    background-color: var(--dyn-bg, #11140f);
+}
+
+/* Responsive typography */
+.main-shelf-title {
+    font-size: clamp(1.1rem, 1.3vw + 0.5rem, 1.4rem);
+}
+
+.main-card-cardTitle {
+    font-size: clamp(0.8rem, 0.9vw + 0.3rem, 0.95rem);
+}
+
+/* ============================================
+   UNDERSTORY — Friend Activity Sidebar
+   ============================================ */
+
+.main-buddyFeed-container {
+    background-color: transparent;
+}
+
+.main-buddyFeed-header {
+    color: var(--spice-text);
+}
+
+.main-buddyFeed-titleContainer {
+    border-bottom: 1px solid var(--dyn-border);
+}
+
+.main-buddyFeed-activityMetadata {
+    color: var(--spice-subtext);
+}
+
+.main-buddyFeed-artistAndTrackName {
+    color: var(--spice-text);
+}
+
+.main-buddyFeed-username {
+    color: var(--dyn-accent);
+}
+
+/* ============================================
+   UNDERSTORY — Modals & Dialogs
+   ============================================ */
+
+.generic-modal__overlay {
+    background-color: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+}
+
+.generic-modal__dialog,
+.GenericModal {
+    background-color: var(--dyn-card) !important;
+    border: 1px solid var(--dyn-border);
+    border-radius: var(--radius-xl);
+    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.5);
+}
+
+/* ============================================
+   UNDERSTORY — Confirm Dialog
+   ============================================ */
+
+.main-confirmDialog-container {
+    background-color: var(--dyn-card);
+    border: 1px solid var(--dyn-border);
+    border-radius: var(--radius-xl);
+    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.5);
+}
+
+.main-confirmDialog-buttonContainer .main-confirmDialog-confirmButton {
+    background-color: var(--accent-content);
+    color: var(--spice-main);
+    border-radius: var(--radius-md);
+    font-weight: 600;
+    transition: box-shadow var(--transition-fast), transform var(--transition-fast);
+}
+
+.main-confirmDialog-buttonContainer .main-confirmDialog-confirmButton:hover {
+    box-shadow: 0 0 8px var(--accent-content-medium);
+    transform: translateY(-1px);
+}
+
+.main-confirmDialog-buttonContainer .main-confirmDialog-confirmButton:active {
+    transform: scale(0.97);
+}
+
+.main-confirmDialog-buttonContainer .main-confirmDialog-cancelButton {
+    border-radius: var(--radius-md);
+    border: 1px solid var(--dyn-border);
+    color: var(--spice-text);
+    transition: background-color var(--transition-fast);
+}
+
+.main-confirmDialog-buttonContainer .main-confirmDialog-cancelButton:hover {
+    background-color: var(--spice-highlight);
+}
+
+.main-confirmDialog-buttonContainer .main-confirmDialog-cancelButton:active {
+    transform: scale(0.97);
+}
+
+.main-rootlist-rootlistItemLink:active,
+.main-yourLibraryX-navLink:active {
+    background-color: var(--spice-highlight);
+}
+
+/* ============================================
+   UNDERSTORY — Responsive Design
+   ============================================ */
+
+@media (max-width: 768px) {
+    .Root__nav-bar {
+        min-width: 72px;
+        max-width: 72px;
+    }
+    
+    .main-yourLibraryX-headerContent,
+    .main-yourLibraryX-header {
+        font-size: 0.65rem;
+        padding: 8px 8px 6px;
+    }
+    
+    .main-rootlist-rootlistItemLink,
+    .main-yourLibraryX-listItem,
+    .main-yourLibraryX-navLink {
+        padding: 4px 8px 4px 12px;
+    }
+    
+    .main-shelf-title {
+        font-size: 1.1rem;
+    }
+    
+    .main-card-cardTitle {
+        font-size: 0.75rem;
+    }
+    
+    .main-nowPlayingBar-nowPlayingBar {
+        padding: 0 8px;
+    }
+    
+    .player-controls__buttons {
+        gap: 4px;
+    }
+    
+    .main-playPauseButton-button {
+        width: 36px;
+        height: 36px;
+    }
+    
+    .main-skipForwardButton-button,
+    .main-skipBackButton-button {
+        width: 28px;
+        height: 28px;
+    }
+}
